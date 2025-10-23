@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
+import { useDispatch, useSelector } from 'react-redux';
+import { addItem } from './CartSlice';
+
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false);
     const [addedToCart, setAddedToCart] = useState({});
+
+    const dispatch = useDispatch();
+    const CartItems = useSelector(state => state.cart.items);
+
 
     const plantsArray = [
         {
@@ -261,7 +268,13 @@ function ProductList({ onHomeClick }) {
           ...prevState,
           [product.name]: true,
         }));
-      };
+    };
+
+
+
+    const calculateTotalQuantity = () => {
+        return CartItems ? CartItems.reduce((total, item) => total + item.quantity, 0) : 0;
+    };
 
     return (
         <div>
@@ -296,9 +309,12 @@ function ProductList({ onHomeClick }) {
                                         <img className="product-image" src={plant.image} alt={plant.name}/>
                                         <div className="product-title">{plant.name}</div>
                                         <div className="product-description">{plant.description}</div>
-                                        <div className="product-cost">${plant.cost}</div>
-                                        <button className="product-button" onClick={() => handleAddToCart(plant)}>
-                                            Add to Cart
+                                        <div className="product-cost">{plant.cost}</div>
+                                        <button className={`product-button${CartItems.find(item => item.name === plant.name) ? ' added-to-cart' : ''}`} 
+                                        onClick={() => handleAddToCart(plant)} 
+                                        disabled={!!CartItems.find(item => item.name === plant.name)}
+                                        >
+                                            {CartItems.find(item => item.name === plant.name) ? 'Added to cart' : 'Add to Cart'}
                                         </button>
                                     </div>
                                 ))}
